@@ -1,0 +1,6 @@
+{
+    "python.analysis.stubPath": "C:/Users/micha/AppData/Roaming/Python/Python39/site-packages/FreeCAD-stubs",
+    "python.analysis.extraPaths": [
+      "Lib1"
+    ]
+  }
