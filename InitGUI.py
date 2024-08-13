@@ -1,6 +1,25 @@
-from FreeCAD import Workbench
+import FreeCAD as App
 import FreeCADGui as Gui
-import Drawing, Part
+
+class DocumentObserver():
+    def __init__(self) -> None:
+        App.addDocumentObserver(self)
+
+    def slotCreatedDocument(self, doc):
+        print(f"Document created {doc.Name}")
+
+    def slotDeletedDocument(self, doc):
+        print(f"Doucment deleted {doc.Name}")
+
+    def slotActivatedDocument(self, doc):
+        print(f"Document activated {doc.Name}")
+        self.run_custom_code(doc)
+
+    def slotChangedObject(self, doc, x):
+        print(f"Object changed: {doc.Name}")
+
+    def run_custom_code(self, doc):
+        pass
 
 class TwoByTwoWb(Workbench):
 
@@ -12,6 +31,7 @@ class TwoByTwoWb(Workbench):
         """This function is executed when the workbench is first activated.
         It is executed once in a FreeCAD session followed by the Activated function.
         """
+
         # import MyModuleA, MyModuleB # import here all the needed files that create your FreeCAD commands
         self.list = ["MyCommand1", "MyCommand2"] # a list of command names created in the line above
         self.appendToolbar("My Commands", self.list) # creates a new toolbar with your commands
@@ -37,3 +57,4 @@ class TwoByTwoWb(Workbench):
         return "Gui::PythonWorkbench"
        
 Gui.addWorkbench(TwoByTwoWb())
+observer = DocumentObserver()
