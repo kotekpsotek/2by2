@@ -1,25 +1,8 @@
+import os
 import FreeCAD as App
 import FreeCADGui as Gui
 
-class DocumentObserver():
-    def __init__(self) -> None:
-        App.addDocumentObserver(self)
-
-    def slotCreatedDocument(self, doc):
-        print(f"Document created {doc.Name}")
-
-    def slotDeletedDocument(self, doc):
-        print(f"Doucment deleted {doc.Name}")
-
-    def slotActivatedDocument(self, doc):
-        print(f"Document activated {doc.Name}")
-        self.run_custom_code(doc)
-
-    def slotChangedObject(self, doc, x):
-        print(f"Object changed: {doc.Name}")
-
-    def run_custom_code(self, doc):
-        pass
+icon_dir = os.path.join(".", "icons", "workbench.svg")
 
 class TwoByTwoWb(Workbench):
 
@@ -32,11 +15,15 @@ class TwoByTwoWb(Workbench):
         It is executed once in a FreeCAD session followed by the Activated function.
         """
 
-        # import MyModuleA, MyModuleB # import here all the needed files that create your FreeCAD commands
-        self.list = ["MyCommand1", "MyCommand2"] # a list of command names created in the line above
-        self.appendToolbar("My Commands", self.list) # creates a new toolbar with your commands
-        self.appendMenu("My New Menu", self.list) # creates a new menu
-        self.appendMenu(["An existing Menu", "My submenu"], self.list) # appends a submenu to an existing menu
+        # import here all the needed files that create your FreeCAD commands
+        import DefineMaterialsCmd;
+
+        self.list = [
+            "2by2_DefMaterials"
+        ] # a list of command names created in the line above
+        self.appendToolbar("2by2", self.list) # creates a new toolbar with your commands
+        self.appendMenu("2by2", self.list) # creates a new menu
+        self.appendMenu(["2by2"], self.list) # appends a submenu to an existing menu
 
     def Activated(self):
         """This function is executed whenever the workbench is activated"""
@@ -57,4 +44,3 @@ class TwoByTwoWb(Workbench):
         return "Gui::PythonWorkbench"
        
 Gui.addWorkbench(TwoByTwoWb())
-observer = DocumentObserver()
