@@ -1,6 +1,9 @@
 import os
+import json
 import FreeCADGui;
 import FreeCAD as FCad
+from pathlib import Path
+from dataclasses import dataclass, asdict
 from utils.ModelTableView import MyTableModel
 from PySide2.QtCore import QFile
 from PySide2 import QtCore, QtGui
@@ -17,10 +20,54 @@ path_define_nmat_ui = os.path.join(__dir__, "ui", "define_new_materialui.ui")
 @dataclass
 class Material:
     materialName: str
-    weight: int
+    weight: int = 0
 
-materialsList = []
 weightUnit = "g/mm3"
+
+class Materials:
+    def __init__(self, material: Material):
+        self.material = material
+
+    def save(self):
+        """ Add new material to materials file """
+        # Prepare data to save
+        dict_material = asdict(self.material)
+
+        # Save within file
+        path_file = Path(__dir__, "data", "materials.json")
+        
+        def doesntexists():
+            # define it
+            dict_mat = { "materials": [dict_material] }
+
+            # json it
+            json_content = json.dumps(dict_mat)
+
+            # save it
+            file.write(json_content)
+
+        # Operation on data file
+        with path_file.open("r+") as file:
+            
+            if path_file.is_file(): # File exists
+                # read it
+                content = path_file.read_text()
+                print(len(content))
+
+                if len(content) > 0:
+                    # decode it
+                    json_decoder = json.JSONDecoder()
+                    json_content = json_decoder.decode(content) # { "materials": [{ "materialName": "name", weight: 12 }] }
+
+                    # Add to materials it
+                    json_content["materials"].append(dict_material)
+
+                    # save in file it
+                    file.write(json.dumps(json_content))
+                else:
+                    doesntexists()
+            else: # File doesn't exists
+                doesntexists()
 
 
 class DefineMaterials:
@@ -72,7 +119,9 @@ class DefineMaterials:
                     # TODO: Check matname field has not same numbers
                     if weight.isdigit():
                         mat = Material(materialName=matname, weight=weight)
-                        materialsList.append(mat)
+
+                        # Save it to file with materials
+                        Materials(material=mat).save()
 
                         DEF_MATERIAL.hide()
                     else:
