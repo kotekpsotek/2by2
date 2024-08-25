@@ -1,4 +1,5 @@
 import os
+import re
 import json
 import FreeCADGui;
 import FreeCAD as FCad
@@ -87,8 +88,7 @@ class MakeNewMaterialWindow:
 
             # Make checks
             if len(weight) != 0 and len(matname) != 0:
-                # TODO: Check matname field has not same numbers
-                if weight.isdigit():
+                if weight.isdigit() and re.search(r'[a-zA-Z]', matname):
                     mat = Material(materialName=matname, weight=weight)
 
                     # Save it to file with materials
