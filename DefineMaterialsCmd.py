@@ -69,6 +69,47 @@ class Materials:
             else: # File doesn't exists
                 doesntexists()
 
+class MakeNewMaterialWindow:
+    """Handle, user click on **"Define new"** button"""
+    def __init__(self) -> None:
+        new_mat = QUiLoader()
+        def_mat_ui_file = QFile(path_define_nmat_ui)
+        
+        global DEF_MATERIAL
+        DEF_MATERIAL = new_mat.load(def_mat_ui_file, None)
+        DEF_MATERIAL.show()
+
+        # Handle "define new material window logic"
+        def addNewHandle():
+            """ Add new material to list. Only when is fully correct """
+            matname: str = DEF_MATERIAL.findChild(QTextEdit, "matSrcName").toPlainText().strip()
+            weight: str = DEF_MATERIAL.findChild(QTextEdit, "weightSrc").toPlainText().strip()
+
+            # Make checks
+            if len(weight) != 0 and len(matname) != 0:
+                # TODO: Check matname field has not same numbers
+                if weight.isdigit():
+                    mat = Material(materialName=matname, weight=weight)
+
+                    # Save it to file with materials
+                    Materials(material=mat).save()
+
+                    DEF_MATERIAL.hide()
+                else:
+                    FCad.Console.PrintError("\"Weight\" field should contain just same number string")
+            else:
+                FCad.Console.PrintError("\"Weight\" and \"Material name\" fields cannot be empty!. Leave there your desired value")
+
+
+        def cancelHandle():
+            """ Omit new material without any save for current state within textFields """
+            DEF_MATERIAL.hide()
+
+        cancelButton = DEF_MATERIAL.findChild(QPushButton, "cancelButton")
+        cancelButton.clicked.connect(cancelHandle)
+        
+        addButton = DEF_MATERIAL.findChild(QPushButton, "addButton")
+        addButton.clicked.connect(addNewHandle)
 
 class DefineMaterials:
     """ Define materials sheet for construction """
@@ -97,51 +138,8 @@ class DefineMaterials:
         table_view.setEditTriggers(QTableView.NoEditTriggers)  # Disable editing
         # TODO: FreeCad read base documentation on a Github to understand how is, delegate button to table column
 
-        # Define new material window
-        def handleDefineNew():
-            """Handle, user click on **"Define new"** button"""
-            # TODO: Move this to sepearte class
-            new_mat = QUiLoader()
-            def_mat_ui_file = QFile(path_define_nmat_ui)
-            
-            global DEF_MATERIAL
-            DEF_MATERIAL = new_mat.load(def_mat_ui_file, None)
-            DEF_MATERIAL.show()
-
-            # Handle "define new material window logic"
-            def addNewHandle():
-                """ Add new material to list. Only when is fully correct """
-                matname: str = DEF_MATERIAL.findChild(QTextEdit, "matSrcName").toPlainText().strip()
-                weight: str = DEF_MATERIAL.findChild(QTextEdit, "weightSrc").toPlainText().strip()
-
-                # Make checks
-                if len(weight) != 0 and len(matname) != 0:
-                    # TODO: Check matname field has not same numbers
-                    if weight.isdigit():
-                        mat = Material(materialName=matname, weight=weight)
-
-                        # Save it to file with materials
-                        Materials(material=mat).save()
-
-                        DEF_MATERIAL.hide()
-                    else:
-                        FCad.Console.PrintError("\"Weight\" field should contain just same number string")
-                else:
-                    FCad.Console.PrintError("\"Weight\" and \"Material name\" fields cannot be empty!. Leave there your desired value")
-
-
-            def cancelHandle():
-                """ Omit new material without any save for current state within textFields """
-                DEF_MATERIAL.hide()
-
-            cancelButton = DEF_MATERIAL.findChild(QPushButton, "cancelButton")
-            cancelButton.clicked.connect(cancelHandle)
-            
-            addButton = DEF_MATERIAL.findChild(QPushButton, "addButton")
-            addButton.clicked.connect(addNewHandle)
-
         def_new_but: QPushButton = WIDGET_w.findChild(QPushButton, "DefineName")
-        def_new_but.clicked.connect(handleDefineNew)
+        def_new_but.clicked.connect(MakeNewMaterialWindow())
 
 
     def IsActive(self):
