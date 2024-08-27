@@ -1,4 +1,4 @@
-from PySide2.QtCore import Qt, QAbstractTableModel
+from PySide2.QtCore import Qt, QAbstractTableModel, QModelIndex
 
 class MyTableModel(QAbstractTableModel):
     def __init__(self, data, headers):
@@ -8,6 +8,16 @@ class MyTableModel(QAbstractTableModel):
 
     def rowCount(self, parent=None):
         return len(self._data)
+
+    def insertRows(self, position, rows, data, parent=QModelIndex()):
+        self.beginInsertRows(parent, position, position + rows - 1)
+    
+        for i in range(rows):
+            self._data.append(data)
+            
+        self.endInsertRows()
+    
+        return True
 
     def columnCount(self, parent=None):
         return len(self._headers)

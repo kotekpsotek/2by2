@@ -28,6 +28,7 @@ weightUnit = "g/mm3"
 class Materials:
     def __init__(self, material: Material):
         self.material = material
+        self.path_file = Path(__dir__, "data", "materials.json")
 
     def save(self):
         """ Add new material to materials file """
@@ -35,8 +36,6 @@ class Materials:
         dict_material = asdict(self.material)
 
         # Save within file
-        path_file = Path(__dir__, "data", "materials.json")
-        
         def doesntexists():
             # define it
             dict_mat = { "materials": [dict_material] }
@@ -48,11 +47,11 @@ class Materials:
             file.write(json_content)
 
         # Operation on data file
-        with path_file.open("r+") as file:
+        with self.path_file.open("r+") as file:
             
-            if path_file.is_file(): # File exists
+            if self.path_file.is_file(): # File exists
                 # read it
-                content = path_file.read_text()
+                content = self.path_file.read_text()
                 print(len(content))
 
                 if len(content) > 0:
@@ -70,47 +69,81 @@ class Materials:
             else: # File doesn't exists
                 doesntexists()
 
+    def get_all(self):
+        # read it
+        content = self.path_file.read_text()
+
+        # unjson it -> list[dict]
+        json_dict = json.load(content)["materials"]
+
+        # To Material class each
+        output = []
+        for json_mat in json_dict:
+            one = Material(**json_mat)
+            output.append(one)
+
+        return output
+    
+    def to_list(self):
+        """ Transform materials class to list with materials rows only fields """
+        all = self.get_all()
+
+        results = []
+        for row in all:
+            results.append([row.materialName, row.weight])
+        
+        return results
+        
 class MakeNewMaterialWindow:
     """Handle, user click on **"Define new"** button"""
-    def __init__(self) -> None:
-        new_mat = QUiLoader()
-        def_mat_ui_file = QFile(path_define_nmat_ui)
-        
-        global DEF_MATERIAL
-        DEF_MATERIAL = new_mat.load(def_mat_ui_file, None)
-        DEF_MATERIAL.show()
+    def __init__(self, table_model: MyTableModel) -> None:
+        self.table_view = table_model
 
-        # Handle "define new material window logic"
-        def addNewHandle():
-            """ Add new material to list. Only when is fully correct """
-            matname: str = DEF_MATERIAL.findChild(QTextEdit, "matSrcName").toPlainText().strip()
-            weight: str = DEF_MATERIAL.findChild(QTextEdit, "weightSrc").toPlainText().strip()
+    def display(self):
+        def src():
+            new_mat = QUiLoader()
+            def_mat_ui_file = QFile(path_define_nmat_ui)
+            
+            global DEF_MATERIAL
+            DEF_MATERIAL = new_mat.load(def_mat_ui_file, None)
+            DEF_MATERIAL.show()
+            
+            def addNewHandle():
+                """ Add new material to list. Only when is fully correct """
+                matname: str = DEF_MATERIAL.findChild(QTextEdit, "matSrcName").toPlainText().strip()
+                weight: str = DEF_MATERIAL.findChild(QTextEdit, "weightSrc").toPlainText().strip()
 
-            # Make checks
-            if len(weight) != 0 and len(matname) != 0:
-                if weight.isdigit() and re.search(r'[a-zA-Z]', matname):
-                    mat = Material(materialName=matname, weight=weight)
+                # Make checks
+                if len(weight) != 0 and len(matname) != 0:
+                    if weight.isdigit() and re.search(r'[a-zA-Z]', matname):
+                        mat = Material(materialName=matname, weight=weight)
 
-                    # Save it to file with materials
-                    Materials(material=mat).save()
+                        # Save it to file with materials
+                        materials = Materials(material=mat)
+                        materials.save()
 
-                    DEF_MATERIAL.hide()
+                        # Update material list table
+                        self.table_view.insertRows(self.table_view.rowCount(), 1, [matname, weight])
+
+                        # Hide view when everything succeed
+                        DEF_MATERIAL.hide()
+                    else:
+                        FCad.Console.PrintError("\"Weight\" field should contain just same number string")
                 else:
-                    FCad.Console.PrintError("\"Weight\" field should contain just same number string")
-            else:
-                FCad.Console.PrintError("\"Weight\" and \"Material name\" fields cannot be empty!. Leave there your desired value")
+                    FCad.Console.PrintError("\"Weight\" and \"Material name\" fields cannot be empty!. Leave there your desired value")
 
+            def cancelHandle():
+                """ Omit new material without any save for current state within textFields """
+                DEF_MATERIAL.hide()
 
-        def cancelHandle():
-            """ Omit new material without any save for current state within textFields """
-            DEF_MATERIAL.hide()
+            cancelButton = DEF_MATERIAL.findChild(QPushButton, "cancelButton")
+            cancelButton.clicked.connect(cancelHandle)
+            
+            addButton = DEF_MATERIAL.findChild(QPushButton, "addButton")
+            addButton.clicked.connect(addNewHandle)
 
-        cancelButton = DEF_MATERIAL.findChild(QPushButton, "cancelButton")
-        cancelButton.clicked.connect(cancelHandle)
+        return src
         
-        addButton = DEF_MATERIAL.findChild(QPushButton, "addButton")
-        addButton.clicked.connect(addNewHandle)
-
 class DefineMaterials:
     """ Define materials sheet for construction """
 
@@ -137,10 +170,11 @@ class DefineMaterials:
         table_view.setModel(my_model)
         table_view.setEditTriggers(QTableView.NoEditTriggers)  # Disable editing
         # TODO: FreeCad read base documentation on a Github to understand how is, delegate button to table column
+        WIDGET_w.update()
 
+        new_mat_class = MakeNewMaterialWindow(my_model)
         def_new_but: QPushButton = WIDGET_w.findChild(QPushButton, "DefineName")
-        def_new_but.clicked.connect(MakeNewMaterialWindow())
-
+        def_new_but.clicked.connect(new_mat_class.display())
 
     def IsActive(self):
         # Return True if the command can be executed

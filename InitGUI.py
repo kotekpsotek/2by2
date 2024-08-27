@@ -6,7 +6,7 @@ icon_dir = os.path.join(".", "icons", "workbench.svg")
 
 class TwoByTwoWb(Workbench):
 
-    MenuText = "2by2"
+    MenuText = "two_by_two"
     ToolTip = "Get on paper how much specific material you need to create real world thing"
     Icon = """paste here the contents of a 16x16 xpm icon"""
 
