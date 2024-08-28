@@ -9,7 +9,7 @@ from utils.ModelTableView import MyTableModel
 from PySide2.QtCore import QFile
 from PySide2 import QtCore, QtGui
 from PySide2.QtUiTools import QUiLoader
-from PySide2.QtWidgets import QDockWidget, QWidget, QTableView, QPushButton, QTextEdit, QDialog, QLabel, QVBoxLayout
+from PySide2.QtWidgets import QDockWidget, QWidget, QTableView, QPushButton, QTextEdit, QDialog, QLabel, QVBoxLayout, QComboBox
 # from PySide2 import QtWidgets, QtCore, QtGui
 from dataclasses import dataclass
 
@@ -21,9 +21,14 @@ path_define_nmat_ui = os.path.join(__dir__, "ui", "define_new_materialui.ui")
 @dataclass
 class Material:
     materialName: str
-    weight: int = 0
+    weight: float = 0
 
 weightUnit = "g/mm3"
+defaultMaterialsList = [Material("steel", 12)]
+
+def format_material(mat: Material):
+    """ Format material to string appear in form """
+    return f"{mat.materialName} | {mat.weight}{weightUnit}"
 
 class Materials:
     def __init__(self, material: Material = None):
@@ -93,7 +98,7 @@ class Materials:
             results.append([row.materialName, row.weight])
         
         return results
-        
+    
 class MakeNewMaterialWindow:
     """Handle, user click on **"Define new"** button"""
     def __init__(self, table_model: MyTableModel) -> None:
@@ -181,6 +186,20 @@ class DefineMaterials:
 
         # Clicked on ready to use
         def_new_but.clicked.connect(new_mat_class.display())
+
+        # Combobox
+        combobox: QComboBox = WIDGET_w.findChild(QComboBox, "SelectFromExistsing")
+        for default_mat in defaultMaterialsList:
+            """ Fullfill Combobox """
+            combobox.addItem(format_material(default_mat), default_mat)
+
+        # Pass selected in combobox items to project materials list
+        def handle_add_comb():
+            c_d: Material = combobox.currentData()
+            my_model.insertRows(my_model.rowCount(), 1, [[c_d.materialName, c_d.weight]])
+            
+        add_comb_b = WIDGET_w.findChild(QPushButton, "AddAccept")
+        add_comb_b.clicked.connect(handle_add_comb)
 
         # TODO: Make list of ready to use materials
         # TODO: Remove existsing material from table via button and update QTableView model
