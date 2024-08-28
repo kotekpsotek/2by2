@@ -184,6 +184,9 @@ class DefineMaterials:
 
         # TODO: Make list of ready to use materials
         # TODO: Remove existsing material from table via button and update QTableView model
+        finish_but: QPushButton = WIDGET_w.findChild(QPushButton, "Accept")
+        finish_but.clicked.connect(lambda: WIDGET_w.hide())
+
 
     def IsActive(self):
         # Return True if the command can be executed
