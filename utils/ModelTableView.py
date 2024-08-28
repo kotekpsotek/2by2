@@ -13,7 +13,8 @@ class MyTableModel(QAbstractTableModel):
         self.beginInsertRows(parent, position, position + rows - 1)
     
         for i in range(rows):
-            self._data.append(data)
+            p_data = data[i]
+            self._data.append(p_data)
             
         self.endInsertRows()
     

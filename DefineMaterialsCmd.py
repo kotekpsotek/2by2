@@ -26,7 +26,7 @@ class Material:
 weightUnit = "g/mm3"
 
 class Materials:
-    def __init__(self, material: Material):
+    def __init__(self, material: Material = None):
         self.material = material
         self.path_file = Path(__dir__, "data", "materials.json")
 
@@ -74,7 +74,7 @@ class Materials:
         content = self.path_file.read_text()
 
         # unjson it -> list[dict]
-        json_dict = json.load(content)["materials"]
+        json_dict = json.loads(content)["materials"]
 
         # To Material class each
         output = []
@@ -123,7 +123,7 @@ class MakeNewMaterialWindow:
                         materials.save()
 
                         # Update material list table
-                        self.table_view.insertRows(self.table_view.rowCount(), 1, [matname, weight])
+                        self.table_view.insertRows(self.table_view.rowCount(), 1, [[matname, weight]])
 
                         # Hide view when everything succeed
                         DEF_MATERIAL.hide()
@@ -174,7 +174,16 @@ class DefineMaterials:
 
         new_mat_class = MakeNewMaterialWindow(my_model)
         def_new_but: QPushButton = WIDGET_w.findChild(QPushButton, "DefineName")
+
+        # Load old materials
+        listMaterials = Materials().to_list()
+        my_model.insertRows(0, len(listMaterials), listMaterials)
+
+        # Clicked on ready to use
         def_new_but.clicked.connect(new_mat_class.display())
+
+        # TODO: Make list of ready to use materials
+        # TODO: Remove existsing material from table via button and update QTableView model
 
     def IsActive(self):
         # Return True if the command can be executed
