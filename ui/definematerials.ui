@@ -35,11 +35,9 @@
     <property name="autoFillBackground">
      <bool>false</bool>
     </property>
-    <item>
-     <property name="text">
-      <string>one_option</string>
-     </property>
-    </item>
+    <property name="currentText">
+     <string/>
+    </property>
    </widget>
    <widget class="QLabel" name="label_2">
     <property name="enabled">
@@ -54,13 +52,13 @@
      </rect>
     </property>
     <property name="text">
-     <string>Choose Material</string>
+     <string>Default Materials</string>
     </property>
    </widget>
    <widget class="QPushButton" name="DefineName">
     <property name="geometry">
      <rect>
-      <x>330</x>
+      <x>440</x>
       <y>150</y>
       <width>81</width>
       <height>41</height>
@@ -73,7 +71,7 @@
    <widget class="QPushButton" name="AddAccept">
     <property name="geometry">
      <rect>
-      <x>420</x>
+      <x>330</x>
       <y>150</y>
       <width>101</width>
       <height>41</height>
@@ -91,7 +89,7 @@
      <rect>
       <x>20</x>
       <y>200</y>
-      <width>171</width>
+      <width>191</width>
       <height>31</height>
      </rect>
     </property>
@@ -102,7 +100,7 @@
      </font>
     </property>
     <property name="text">
-     <string>Materials list</string>
+     <string>Your Materials list</string>
     </property>
    </widget>
    <widget class="QTableView" name="MaterialsList">
@@ -142,7 +140,7 @@
      <rect>
       <x>0</x>
       <y>10</y>
-      <width>631</width>
+      <width>686</width>
       <height>131</height>
      </rect>
     </property>
@@ -159,7 +157,7 @@
         </font>
        </property>
        <property name="text">
-        <string>Define Your Material</string>
+        <string>Define Your Material List</string>
        </property>
       </widget>
      </item>
