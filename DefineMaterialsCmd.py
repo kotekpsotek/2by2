@@ -9,7 +9,7 @@ from utils.ModelTableView import MyTableModel
 from PySide2.QtCore import QFile
 from PySide2 import QtCore, QtGui
 from PySide2.QtUiTools import QUiLoader
-from PySide2.QtWidgets import QDockWidget, QWidget, QTableView, QPushButton, QTextEdit, QDialog, QLabel, QVBoxLayout, QComboBox
+from PySide2.QtWidgets import QDockWidget, QWidget, QTableView, QPushButton, QTextEdit, QDialog, QLabel, QVBoxLayout, QComboBox, QStyledItemDelegate
 # from PySide2 import QtWidgets, QtCore, QtGui
 from dataclasses import dataclass
 
@@ -148,7 +148,7 @@ class MakeNewMaterialWindow:
             addButton.clicked.connect(addNewHandle)
 
         return src
-        
+
 class DefineMaterials:
     """ Define materials sheet for construction """
 
@@ -180,11 +180,18 @@ class DefineMaterials:
         new_mat_class = MakeNewMaterialWindow(my_model)
         def_new_but: QPushButton = WIDGET_w.findChild(QPushButton, "DefineName")
 
-        # Load old materials
+        """ Load old materials """
         listMaterials = Materials().to_list()
         my_model.insertRows(0, len(listMaterials), listMaterials)
 
-        # Clicked on ready to use
+        """ Add remove button """
+        my_model.insertColumns(my_model.columnCount(), 1)
+        # TODO: Add button to last column for each row
+        """ for row in range(my_model.rowCount()):
+            button_w = QPushButton("Remove")
+            table_view.setIndexWidget(my_model.index(row, my_model.columnCount() - 1), button_w) """
+
+        """ Clicked on ready to use """
         def_new_but.clicked.connect(new_mat_class.display())
 
         # Combobox
@@ -193,13 +200,21 @@ class DefineMaterials:
             """ Fullfill Combobox """
             combobox.addItem(format_material(default_mat), default_mat)
 
-        # Pass selected in combobox items to project materials list
+        """ Pass selected in combobox items to project materials list """
         def handle_add_comb():
             c_d: Material = combobox.currentData()
             my_model.insertRows(my_model.rowCount(), 1, [[c_d.materialName, c_d.weight]])
+            # TODO: Save this material on list
             
         add_comb_b = WIDGET_w.findChild(QPushButton, "AddAccept")
         add_comb_b.clicked.connect(handle_add_comb)
+
+        # Manage button handle
+        def handle_manage():
+            """ Display Manage Window """
+        
+        m_button = WIDGET_w.findChild(QPushButton, "manageList")
+        m_button.clicked.connect(handle_manage)
 
         # TODO: Make list of ready to use materials
         # TODO: Remove existsing material from table via button and update QTableView model
