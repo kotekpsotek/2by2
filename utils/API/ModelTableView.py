@@ -28,8 +28,16 @@ class MyTableModel(QAbstractTableModel):
             return str(self._data[index.row()][index.column()])
 
     def headerData(self, section, orientation, role=Qt.DisplayRole):
-        if role == Qt.DisplayRole and orientation == Qt.Horizontal:
+        if role == Qt.DisplayRole and orientation == Qt.Horizontal and len(self._headers) > section:
             return self._headers[section]
 
     def flags(self, index):
         return Qt.ItemIsEnabled  # Make all items non-editable
+    
+    def insertColumns(self, position, columns, parent=QModelIndex()):
+        self.beginInsertColumns(parent, position, position + columns - 1)
+        for row in self._data:
+            for _ in range(columns):
+                row.insert(position, "")
+        self.endInsertColumns()
+        return True
